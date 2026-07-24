@@ -211,7 +211,6 @@ dialog input,dialog select{width:100%;padding:12px 14px;border:1px solid var(--s
       <p class="sub" id="statusSalvo">—</p>
     </div>
     <div class="ferramentas">
-      <button class="mini" onclick="salvarLocal(true)" title="Guardar neste navegador">💾 Salvar</button>
       <button class="mini" onclick="exportarJSON()" title="Baixar arquivo pra compartilhar">⬇ Exportar</button>
       <button class="mini" onclick="fImport.click()" title="Abrir um cronograma salvo">⬆ Importar</button>
       <button class="mini" onclick="exportarPNG()" title="Imagem pra mandar no zap">🖼 PNG</button>
@@ -418,15 +417,9 @@ let poupado=0;
 function temStorage(){
   try{localStorage.setItem('_t','1');localStorage.removeItem('_t');return true}catch(e){return false}
 }
-function salvarLocal(avisar){
-  if(!temStorage()){
-    if(avisar) aviso('Este navegador bloqueia o salvamento automático. Use "Exportar" para guardar o arquivo.',true);
-    return false;
-  }
-  localStorage.setItem(CHAVE,JSON.stringify({viagens,poupado,em:Date.now()}));
-  if (window.enviarNuvem) window.enviarNuvem();
-  if(avisar) aviso('Salvo neste navegador ✓');
-  marcarStatus();
+function salvarLocal(){
+  if(temStorage()) localStorage.setItem(CHAVE,JSON.stringify({viagens,poupado,em:Date.now()}));
+  if(window.enviarNuvem) window.enviarNuvem();
   return true;
 }
 function carregarLocal(){
@@ -439,11 +432,18 @@ function carregarLocal(){
   }catch(e){}
   return false;
 }
+let estadoNuvem='conectando';
 function marcarStatus(){
   const el=document.getElementById('statusSalvo');
-  el.textContent=temStorage()
-    ? 'Salvo automaticamente neste navegador · última vez agora'
-    : 'Salvamento automático indisponível aqui — use Exportar para não perder';
+  const mapa={
+    conectando:'Conectando…',
+    online:'Sincronizado ✓ · Emerson e Sofia',
+    offline:'Offline — salvo neste aparelho, sincroniza ao voltar',
+    erro:'Sem nuvem — salvo só neste aparelho'
+  };
+  el.textContent=mapa[estadoNuvem]||mapa.erro;
+  el.style.color = estadoNuvem==='online' ? '#4C8577'
+                 : estadoNuvem==='conectando' ? '#7a8a8f' : '#C0452B';
 }
 
 function exportarJSON(){
@@ -695,27 +695,24 @@ function salvar(){
 carregarLocal();
 render();
 window.addEventListener('beforeunload',()=>salvarLocal());
-/* ---------- SINCRONIA SUPABASE ---------- */
-const SUPA_URL = 'https://dgtmtyskvqqtaqxikjxs.supabase.co'
-const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRndG10eXNrdnFxdGFxeGlranhzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ5MDUxNDksImV4cCI6MjEwMDQ4MTE0OX0.iL2_2iNVVpPAbrfQjxB-kr0wwDDl8ZtqHo2SGjb8zxY';
-const CASAL    = 'emerson-e-sofia';   // igual nos dois celulares
 
-let supa = null, ignorarEco = false;
+/* ================= SINCRONIA SUPABASE ================= */
+const SUPA_URL = 'https://dgtmtyskvqqtaqxikjxs.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRndG10eXNrdnFxdGFxeGlranhzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ5MDUxNDksImV4cCI6MjEwMDQ4MTE0OX0.iL2_2iNVVpPAbrfQjxB-kr0wwDDl8ZtqHo2SGjb8zxY';
+const CASAL    = 'emerson-e-sofia';
+
+let supa=null, ignorarEco=false, pendenteEnvio=false, timerEnvio=null;
 
 async function ligarNuvem(){
   const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
   supa = createClient(SUPA_URL, SUPA_KEY);
 
-  // 1. puxa o que já está salvo
+  // puxa o que já está na nuvem
   const { data, error } = await supa
     .from('cronograma').select('viagens,poupado')
-    .eq('casal', CASAL).single();
+    .eq('casal', CASAL).maybeSingle();
 
-  if (error) {
-    aviso('Sem conexão com a nuvem — salvando só neste aparelho', true);
-    console.error(error);
-    return;
-  }
+  if (error) { estadoNuvem='erro'; marcarStatus(); console.error(error); return; }
 
   if (data && Array.isArray(data.viagens) && data.viagens.length) {
     ignorarEco = true;
@@ -723,15 +720,21 @@ async function ligarNuvem(){
     poupado = +data.poupado || 0;
     render();
     ignorarEco = false;
+  } else {
+    // primeira vez: sobe o que já existe aqui
+    await supa.from('cronograma')
+      .upsert({ casal:CASAL, viagens, poupado, atualizado:new Date().toISOString() });
   }
 
-  // 2. escuta mudanças do outro celular
+  // escuta o outro celular
   supa.channel('sync')
     .on('postgres_changes',
-        { event:'UPDATE', schema:'public', table:'cronograma', filter:`casal=eq.${CASAL}` },
+        { event:'*', schema:'public', table:'cronograma', filter:`casal=eq.${CASAL}` },
         payload => {
           const novo = payload.new;
-          if (JSON.stringify(novo.viagens) === JSON.stringify(viagens)) return;
+          if (!novo || !Array.isArray(novo.viagens)) return;
+          if (JSON.stringify(novo.viagens) === JSON.stringify(viagens)
+              && (+novo.poupado||0) === poupado) return;
           ignorarEco = true;
           viagens = novo.viagens;
           poupado = +novo.poupado || 0;
@@ -741,23 +744,41 @@ async function ligarNuvem(){
         })
     .subscribe();
 
-  // 3. manda as mudanças daqui
-  window.enviarNuvem = async () => {
+  // envio com pequeno atraso: evita mandar 5 vezes seguidas
+  window.enviarNuvem = () => {
     if (!supa || ignorarEco) return;
-    const { error } = await supa.from('cronograma')
-      .update({ viagens, poupado, atualizado: new Date().toISOString() })
-      .eq('casal', CASAL);
-    if (error) console.error(error);
+    pendenteEnvio = true;
+    clearTimeout(timerEnvio);
+    timerEnvio = setTimeout(async () => {
+      try{
+        const { error } = await supa.from('cronograma')
+          .update({ viagens, poupado, atualizado:new Date().toISOString() })
+          .eq('casal', CASAL);
+        if (error) throw error;
+        pendenteEnvio = false;
+        estadoNuvem = 'online'; marcarStatus();
+      }catch(e){
+        console.error(e);
+        estadoNuvem = 'offline'; marcarStatus();
+      }
+    }, 500);
   };
 
-  document.getElementById('statusSalvo').textContent =
-    'Sincronizado na nuvem · Emerson e Sofia';
+  estadoNuvem = 'online';
+  marcarStatus();
 }
+
+// se voltar a internet, reenvia o que ficou pendente
+window.addEventListener('online', () => {
+  if (pendenteEnvio && window.enviarNuvem) window.enviarNuvem();
+});
+window.addEventListener('offline', () => { estadoNuvem='offline'; marcarStatus(); });
 
 ligarNuvem().catch(e => {
   console.error(e);
-  aviso('Nuvem indisponível — os dados seguem salvos aqui', true);
+  estadoNuvem='erro'; marcarStatus();
 });
+
 </script>
 </body>
 </html>
