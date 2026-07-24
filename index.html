@@ -424,6 +424,7 @@ function salvarLocal(avisar){
     return false;
   }
   localStorage.setItem(CHAVE,JSON.stringify({viagens,poupado,em:Date.now()}));
+  if (window.enviarNuvem) window.enviarNuvem();
   if(avisar) aviso('Salvo neste navegador ✓');
   marcarStatus();
   return true;
@@ -694,6 +695,69 @@ function salvar(){
 carregarLocal();
 render();
 window.addEventListener('beforeunload',()=>salvarLocal());
+/* ---------- SINCRONIA SUPABASE ---------- */
+const SUPA_URL = 'https://dgtmtyskvqqtaqxikjxs.supabase.co
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRndG10eXNrdnFxdGFxeGlranhzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ5MDUxNDksImV4cCI6MjEwMDQ4MTE0OX0.iL2_2iNVVpPAbrfQjxB-kr0wwDDl8ZtqHo2SGjb8zxY';
+const CASAL    = 'emerson-e-sofia';   // igual nos dois celulares
+
+let supa = null, ignorarEco = false;
+
+async function ligarNuvem(){
+  const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
+  supa = createClient(SUPA_URL, SUPA_KEY);
+
+  // 1. puxa o que já está salvo
+  const { data, error } = await supa
+    .from('cronograma').select('viagens,poupado')
+    .eq('casal', CASAL).single();
+
+  if (error) {
+    aviso('Sem conexão com a nuvem — salvando só neste aparelho', true);
+    console.error(error);
+    return;
+  }
+
+  if (data && Array.isArray(data.viagens) && data.viagens.length) {
+    ignorarEco = true;
+    viagens = data.viagens;
+    poupado = +data.poupado || 0;
+    render();
+    ignorarEco = false;
+  }
+
+  // 2. escuta mudanças do outro celular
+  supa.channel('sync')
+    .on('postgres_changes',
+        { event:'UPDATE', schema:'public', table:'cronograma', filter:`casal=eq.${CASAL}` },
+        payload => {
+          const novo = payload.new;
+          if (JSON.stringify(novo.viagens) === JSON.stringify(viagens)) return;
+          ignorarEco = true;
+          viagens = novo.viagens;
+          poupado = +novo.poupado || 0;
+          render();
+          ignorarEco = false;
+          aviso('Atualizado pelo outro celular ✓');
+        })
+    .subscribe();
+
+  // 3. manda as mudanças daqui
+  window.enviarNuvem = async () => {
+    if (!supa || ignorarEco) return;
+    const { error } = await supa.from('cronograma')
+      .update({ viagens, poupado, atualizado: new Date().toISOString() })
+      .eq('casal', CASAL);
+    if (error) console.error(error);
+  };
+
+  document.getElementById('statusSalvo').textContent =
+    'Sincronizado na nuvem · Emerson e Sofia';
+}
+
+ligarNuvem().catch(e => {
+  console.error(e);
+  aviso('Nuvem indisponível — os dados seguem salvos aqui', true);
+});
 </script>
 </body>
 </html>
