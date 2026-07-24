@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nossas Viagens</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700;9..144,900&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --tide:#0B3C49;
+  --shell:#FDF6EC;
+  --coral:#E8623C;
+  --palm:#4C8577;
+  --sand:#E4D3B8;
+  --ink:#12262C;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--shell);color:var(--ink);font-family:'Outfit',sans-serif;padding:0 0 80px}
+.wrap{max-width:960px;margin:0 auto}
+.topo{background:var(--tide);color:var(--shell);padding:48px 24px 60px;position:relative;overflow:hidden}
+.topo::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:40px;
+  background:radial-gradient(ellipse 60px 40px at 50% 0,var(--shell) 50%,transparent 51%) repeat-x;background-size:120px 40px}
+.eyebrow{font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--sand);margin-bottom:14px}
+h1{font-family:'Fraunces',serif;font-weight:900;font-size:clamp(38px,7vw,68px);line-height:.95;letter-spacing:-.02em}
+h1 em{font-style:italic;color:var(--coral)}
+.resumo{display:flex;gap:32px;margin-top:28px;flex-wrap:wrap}
+.resumo div{border-left:2px solid rgba(228,211,184,.4);padding-left:14px}
+.resumo b{display:block;font-family:'Fraunces',serif;font-size:26px;font-weight:700}
+.resumo span{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--sand)}
+
+main{padding:44px 24px 0}
+.barra{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:22px;gap:16px;flex-wrap:wrap}
+h2{font-family:'Fraunces',serif;font-size:24px;font-weight:700}
+.sub{font-size:14px;color:#7a8a8f;margin-top:4px}
+button{font-family:inherit;cursor:pointer;border:none}
+.btn{background:var(--coral);color:#fff;padding:12px 22px;border-radius:100px;font-size:14px;font-weight:600;transition:transform .15s,filter .15s}
+.btn:hover{transform:translateY(-2px);filter:brightness(1.06)}
+.btn.ghost{background:transparent;color:var(--tide);border:1.5px solid var(--tide)}
+
+/* ---- galeria de opções ---- */
+.galeria{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:18px;margin-bottom:56px}
+.card{
+  position:relative;border-radius:18px;overflow:hidden;aspect-ratio:3/4;
+  cursor:pointer;border:none;padding:0;text-align:left;display:block;
+  box-shadow:0 2px 0 var(--sand);transition:transform .2s,box-shadow .2s;
+}
+.card:hover{transform:translateY(-4px);box-shadow:0 12px 28px rgba(11,60,73,.22)}
+.card:focus-visible{outline:3px solid var(--coral);outline-offset:3px}
+.card .cena,.card .cena svg{width:100%;height:100%;display:block}
+.card .veu{position:absolute;inset:0;background:linear-gradient(to top,rgba(11,60,73,.92) 0%,rgba(11,60,73,.45) 45%,transparent 75%)}
+.card .txt{position:absolute;left:0;right:0;bottom:0;padding:18px;color:#fff}
+.card .pais{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--sand)}
+.card h3{font-family:'Fraunces',serif;font-size:23px;font-weight:700;line-height:1.05;margin:4px 0 6px}
+.card .preco{font-size:14px;font-weight:600;color:#fff}
+.card .preco small{font-weight:400;opacity:.7}
+.card .mais{
+  position:absolute;top:12px;right:12px;width:34px;height:34px;border-radius:50%;
+  background:rgba(253,246,236,.92);color:var(--tide);font-size:22px;line-height:32px;text-align:center;font-weight:300;
+}
+.card.jaTem .veu{background:rgba(76,133,119,.82)}
+.card.jaTem .mais{background:var(--palm);color:#fff;font-size:16px;line-height:34px}
+
+/* ---- viagens salvas ---- */
+.viagem{background:#fff;border-radius:20px;padding:24px;margin-bottom:18px;box-shadow:0 2px 0 var(--sand);border:1px solid rgba(11,60,73,.08);overflow:hidden}
+.viagem.confirmada{border-left:6px solid var(--palm)}
+.viagem.sonho{border-left:6px dashed var(--coral)}
+.capa{margin:-24px -24px 18px;height:170px;overflow:hidden}
+.capa svg{width:100%;height:100%;display:block}
+.tag{display:inline-block;font-size:11px;letter-spacing:.16em;text-transform:uppercase;padding:5px 12px;border-radius:100px;font-weight:600;margin-bottom:12px}
+.tag.ok{background:var(--palm);color:#fff}
+.tag.talvez{background:var(--sand);color:var(--tide)}
+.destino{font-family:'Fraunces',serif;font-size:30px;font-weight:700;line-height:1.05}
+.quando{color:var(--palm);font-size:14px;font-weight:500;margin-top:4px}
+.contagem{font-size:13px;color:var(--coral);font-weight:600;margin-top:2px}
+.grana{display:flex;gap:24px;margin:18px 0;flex-wrap:wrap;padding:14px 0;border-top:1px solid var(--sand);border-bottom:1px solid var(--sand)}
+.grana div span{display:block;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#7a8a8f}
+.grana div b{font-family:'Fraunces',serif;font-size:20px}
+.pontos{list-style:none;margin-top:6px}
+.pontos li{display:flex;align-items:center;gap:10px;padding:7px 0;font-size:15px}
+.pontos input{width:18px;height:18px;accent-color:var(--palm);cursor:pointer;flex-shrink:0}
+.pontos li.feito label{text-decoration:line-through;opacity:.45}
+.pontos label{cursor:pointer;flex:1}
+.rm{background:none;color:#c2ccce;font-size:18px;padding:0 4px}
+.rm:hover{color:var(--coral)}
+.addponto{display:flex;gap:8px;margin-top:12px}
+.addponto input{flex:1;padding:10px 14px;border:1px solid var(--sand);border-radius:100px;font-family:inherit;font-size:14px;background:var(--shell)}
+.addponto input:focus{outline:2px solid var(--palm);outline-offset:1px}
+.addponto button{background:var(--tide);color:#fff;border-radius:100px;padding:0 18px;font-size:14px}
+.acoes{display:flex;gap:14px;margin-top:16px}
+.acoes button{background:none;font-size:13px;color:var(--tide);text-decoration:underline;padding:0}
+.acoes button:hover{color:var(--coral)}
+
+dialog{border:none;border-radius:24px;padding:32px;max-width:460px;width:92%;background:var(--shell);box-shadow:0 20px 60px rgba(11,60,73,.3)}
+dialog::backdrop{background:rgba(11,60,73,.5)}
+dialog h3{font-family:'Fraunces',serif;font-size:26px;margin-bottom:6px}
+label.f{display:block;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#6b7b80;margin:14px 0 6px}
+dialog input,dialog select{width:100%;padding:12px 14px;border:1px solid var(--sand);border-radius:12px;font-family:inherit;font-size:15px;background:#fff}
+.dupla{display:flex;gap:12px}
+.dupla>div{flex:1}
+.fim{display:flex;gap:10px;margin-top:24px}
+.fim .btn{flex:1;text-align:center}
+.vazio{text-align:center;padding:50px 20px;color:#8d9a9e;background:#fff;border-radius:20px;border:1px dashed var(--sand)}
+.vazio p{font-family:'Fraunces',serif;font-size:20px;margin-bottom:8px;color:var(--tide)}
+.ferramentas{display:flex;gap:8px;flex-wrap:wrap}
+.mini{
+  background:#fff;border:1px solid var(--sand);color:var(--tide);
+  padding:9px 14px;border-radius:100px;font-size:13px;font-weight:500;
+  transition:background .15s,transform .15s;
+}
+.mini:hover{background:var(--sand);transform:translateY(-1px)}
+.mini:focus-visible{outline:2px solid var(--coral);outline-offset:2px}
+
+/* cofrinho da viagem */
+.cofre{margin-top:40px}
+.cofre-box{background:var(--tide);color:var(--shell);border-radius:20px;padding:26px}
+.cofre-box h3{font-family:'Fraunces',serif;font-size:22px;margin-bottom:4px}
+.cofre-box .sub2{font-size:13px;color:var(--sand);margin-bottom:18px}
+.trilho{height:14px;background:rgba(253,246,236,.16);border-radius:100px;overflow:hidden;margin-bottom:10px}
+.trilho i{display:block;height:100%;background:var(--coral);border-radius:100px;transition:width .4s}
+.cofre-nums{display:flex;justify-content:space-between;font-size:13px;color:var(--sand);margin-bottom:16px}
+.cofre-nums b{color:#fff;font-family:'Fraunces',serif;font-size:17px}
+.poupar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.poupar input{padding:10px 14px;border:none;border-radius:100px;font-family:inherit;font-size:14px;width:150px}
+.poupar button{background:var(--coral);color:#fff;border-radius:100px;padding:10px 18px;font-size:14px;font-weight:600}
+.dica{font-size:13px;color:var(--sand);margin-top:12px;line-height:1.5}
+
+/* clima/estação */
+.selo{
+  display:inline-flex;align-items:center;gap:6px;background:var(--shell);
+  border:1px solid var(--sand);border-radius:100px;padding:5px 12px;
+  font-size:12px;color:#5d6f74;margin-left:8px;vertical-align:middle;
+}
+
+/* progresso do roteiro */
+.progresso{display:flex;align-items:center;gap:10px;margin:14px 0 2px}
+.progresso .trilho2{flex:1;height:8px;background:var(--sand);border-radius:100px;overflow:hidden}
+.progresso .trilho2 i{display:block;height:100%;background:var(--palm);transition:width .3s}
+.progresso span{font-size:12px;color:#7a8a8f;white-space:nowrap}
+
+/* autoria */
+.autores{display:flex;gap:8px;flex-wrap:wrap}
+.au{
+  flex:1;min-width:92px;padding:12px 10px;border-radius:12px;border:2px solid var(--sand);
+  background:#fff;font-size:14px;font-weight:600;color:#8d9a9e;transition:all .18s;
+}
+.au.on{color:#fff;transform:translateY(-2px)}
+.au.em.on{background:#C4557A;border-color:#C4557A}
+.au.so.on{background:#3C8FA8;border-color:#3C8FA8}
+.au.nos.on{background:var(--palm);border-color:var(--palm)}
+
+.credito{
+  display:flex;align-items:center;gap:9px;margin:14px 0 0;
+  padding:11px 15px;border-radius:100px;font-size:14px;font-weight:600;
+  animation:entrar .5s cubic-bezier(.2,1.3,.4,1) both;
+}
+.credito.a-Emerson{background:#FBE9F0;color:#9E3557}
+.credito.a-Sofia{background:#E3F1F6;color:#256B84}
+.credito.a-nos{background:#E2F0EB;color:#33604F}
+.credito .bolha{
+  width:28px;height:28px;border-radius:50%;display:grid;place-items:center;
+  color:#fff;font-size:13px;font-weight:700;flex-shrink:0;
+  animation:pulo .6s cubic-bezier(.3,1.6,.5,1) .15s both;
+}
+.credito.a-Emerson .bolha{background:#C4557A}
+.credito.a-Sofia .bolha{background:#3C8FA8}
+.credito.a-nos .bolha{background:var(--palm)}
+.credito .fogos{animation:girar .7s ease .3s both;display:inline-block}
+@keyframes entrar{from{opacity:0;transform:translateX(-14px)}to{opacity:1;transform:none}}
+@keyframes pulo{0%{transform:scale(0) rotate(-40deg)}60%{transform:scale(1.25) rotate(8deg)}100%{transform:scale(1) rotate(0)}}
+@keyframes girar{0%{transform:scale(0) rotate(-90deg);opacity:0}100%{transform:scale(1) rotate(0);opacity:1}}
+.placar{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap}
+.placar span{font-size:12px;color:#7a8a8f}
+.placar b{color:var(--tide)}
+
+@media print{
+  .topo::after,.ferramentas,.galeria,.addponto,.acoes,.barra .btn,.cofre .poupar{display:none!important}
+  body{padding:0}
+  .viagem{break-inside:avoid;box-shadow:none;border:1px solid #ccc;margin-bottom:12px}
+  .topo{padding:24px}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<header class="topo">
+  <div class="wrap">
+    <p class="eyebrow">cronograma do casal</p>
+    <h1>Onde a gente<br><em>vai</em> parar</h1>
+    <div class="resumo">
+      <div><b id="sConf">0</b><span>confirmadas</span></div>
+      <div><b id="sSonho">0</b><span>na lista</span></div>
+      <div><b id="sGrana">R$ 0</b><span>a planejar</span></div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="barra">
+    <div>
+      <h2>Escolham o próximo</h2>
+      <p class="sub">Toque num destino pra adicionar à lista com roteiro e estimativa prontos.</p>
+    </div>
+    <button class="btn ghost" onclick="abrir()">+ Outro destino</button>
+  </div>
+  <div class="galeria" id="galeria"></div>
+
+  <div class="barra">
+    <div>
+      <h2>Nossa lista</h2>
+      <p class="sub" id="statusSalvo">—</p>
+    </div>
+    <div class="ferramentas">
+      <button class="mini" onclick="salvarLocal(true)" title="Guardar neste navegador">💾 Salvar</button>
+      <button class="mini" onclick="exportarJSON()" title="Baixar arquivo pra compartilhar">⬇ Exportar</button>
+      <button class="mini" onclick="fImport.click()" title="Abrir um cronograma salvo">⬆ Importar</button>
+      <button class="mini" onclick="exportarPNG()" title="Imagem pra mandar no zap">🖼 PNG</button>
+      <button class="mini" onclick="window.print()" title="Salvar como PDF">📄 PDF</button>
+      <input type="file" id="fImport" accept="application/json,.json" hidden onchange="importarJSON(this)">
+    </div>
+  </div>
+  <div id="lista"></div>
+
+  <section class="cofre" id="cofre"></section>
+</main>
+
+<dialog id="quem">
+  <h3 id="quemTitulo">Quem quer?</h3>
+  <p class="sub" style="margin-bottom:18px">Fica registrado no roteiro.</p>
+  <div class="autores">
+    <button type="button" class="au em" onclick="confirmarQuem('Emerson')">Emerson</button>
+    <button type="button" class="au so" onclick="confirmarQuem('Sofia')">Sofia</button>
+    <button type="button" class="au nos" onclick="confirmarQuem('Nós dois')">Nós dois</button>
+  </div>
+  <div class="fim"><button class="btn ghost" onclick="quem.close()">Cancelar</button></div>
+</dialog>
+
+<dialog id="modal">
+  <h3 id="modalTitulo">Nova viagem</h3>
+  <label class="f" for="fDest">Destino</label>
+  <input id="fDest" placeholder="Ex: Maragogi">
+  <div class="dupla">
+    <div><label class="f" for="fData">Data planejada</label><input id="fData" type="month"></div>
+    <div><label class="f" for="fStatus">Status</label>
+      <select id="fStatus"><option value="sonho">Na lista</option><option value="confirmada">Confirmada</option></select></div>
+  </div>
+  <div class="dupla">
+    <div><label class="f" for="fDias">Dias</label><input id="fDias" type="number" min="1" placeholder="7"></div>
+    <div><label class="f" for="fValor">Valor do casal (R$)</label><input id="fValor" type="number" min="0" placeholder="4500"></div>
+  </div>
+  <label class="f">Quem tá montando esse roteiro?</label>
+  <div class="autores">
+    <button type="button" class="au em" data-autor="Emerson" onclick="escolherAutor(this)">Emerson</button>
+    <button type="button" class="au so" data-autor="Sofia" onclick="escolherAutor(this)">Sofia</button>
+    <button type="button" class="au nos" data-autor="Nós dois" onclick="escolherAutor(this)">Nós dois</button>
+  </div>
+  <label class="f" for="fCena">Ilustração</label>
+  <select id="fCena">
+    <option value="praia">Praia</option><option value="ilha">Ilha</option>
+    <option value="serra">Serra / cachoeira</option><option value="sertao">Sertão</option>
+    <option value="cidade">Cidade</option><option value="europa">Vilarejo europeu</option>
+  </select>
+  <div class="fim">
+    <button class="btn ghost" onclick="modal.close()">Cancelar</button>
+    <button class="btn" onclick="salvar()">Salvar</button>
+  </div>
+</dialog>
+
+<script>
+const MESES=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+
+/* cenas ilustradas — desenhadas em SVG, sem depender de servidor externo */
+const CENAS={
+ praia:`<svg viewBox="0 0 300 400" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+  <defs><linearGradient id="ceuP" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#FFD9A0"/><stop offset=".45" stop-color="#F7A981"/><stop offset="1" stop-color="#E8623C"/></linearGradient></defs>
+  <rect width="300" height="400" fill="url(#ceuP)"/>
+  <circle cx="150" cy="196" r="44" fill="#FFF1D6" opacity=".95"/>
+  <path d="M0 210h300v190H0z" fill="#1B6C7A"/>
+  <path d="M0 232q75 14 150 0t150 0v40q-75-14-150 0T0 272z" fill="#2E8C97" opacity=".7"/>
+  <path d="M0 300q75 16 150 0t150 0v100H0z" fill="#37A0A8" opacity=".6"/>
+  <path d="M0 340q75 18 150 0t150 0v60H0z" fill="#E4D3B8"/>
+  <path d="M232 340c0-46-6-84-8-104" stroke="#7A4B2A" stroke-width="7" fill="none" stroke-linecap="round"/>
+  <g fill="#2F6E4F">
+   <path d="M224 238c-24-16-44-14-56 0 20-6 38-3 56 6z"/><path d="M224 238c22-20 44-20 58-8-22-2-38 3-58 12z"/>
+   <path d="M224 238c-18 4-32 18-36 36 12-16 24-26 40-30z"/><path d="M224 238c20 6 32 20 34 38-10-18-20-28-36-32z"/></g>
+  <circle cx="224" cy="236" r="6" fill="#8B5E34"/>
+ </svg>`,
+ cidade:`<svg viewBox="0 0 300 400" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+  <defs><linearGradient id="ceuC" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#2A6B84"/><stop offset="1" stop-color="#F2B872"/></linearGradient></defs>
+  <rect width="300" height="400" fill="url(#ceuC)"/>
+  <circle cx="60" cy="70" r="3" fill="#FFF" opacity=".8"/><circle cx="118" cy="42" r="2" fill="#FFF" opacity=".6"/>
+  <circle cx="212" cy="60" r="2.5" fill="#FFF" opacity=".7"/><circle cx="256" cy="110" r="2" fill="#FFF" opacity=".5"/>
+  <path d="M0 400V230h56v170z" fill="#F2E3C6"/><path d="M56 400V186h64v214z" fill="#E86F52"/>
+  <path d="M120 400V252h48v148z" fill="#EFCF7A"/><path d="M168 400V166h60v234z" fill="#5FA3A0"/>
+  <path d="M228 400V244h72v156z" fill="#D9BFA0"/>
+  <g fill="#2A3F4A" opacity=".72">
+   <rect x="12" y="250" width="13" height="19" rx="2"/><rect x="33" y="250" width="13" height="19" rx="2"/>
+   <rect x="12" y="290" width="13" height="19" rx="2"/><rect x="33" y="290" width="13" height="19" rx="2"/>
+   <rect x="70" y="208" width="14" height="21" rx="2"/><rect x="94" y="208" width="14" height="21" rx="2"/>
+   <rect x="70" y="252" width="14" height="21" rx="2"/><rect x="94" y="252" width="14" height="21" rx="2"/>
+   <rect x="70" y="296" width="14" height="21" rx="2"/><rect x="94" y="296" width="14" height="21" rx="2"/>
+   <rect x="132" y="274" width="12" height="18" rx="2"/><rect x="150" y="274" width="12" height="18" rx="2"/>
+   <rect x="132" y="314" width="12" height="18" rx="2"/><rect x="150" y="314" width="12" height="18" rx="2"/>
+   <rect x="182" y="190" width="14" height="20" rx="2"/><rect x="206" y="190" width="14" height="20" rx="2"/>
+   <rect x="182" y="232" width="14" height="20" rx="2"/><rect x="206" y="232" width="14" height="20" rx="2"/>
+   <rect x="182" y="274" width="14" height="20" rx="2"/><rect x="206" y="274" width="14" height="20" rx="2"/>
+   <rect x="244" y="266" width="14" height="20" rx="2"/><rect x="270" y="266" width="14" height="20" rx="2"/>
+   <rect x="244" y="308" width="14" height="20" rx="2"/><rect x="270" y="308" width="14" height="20" rx="2"/></g>
+  <path d="M168 166l30-26 30 26z" fill="#3E7D7A"/>
+ </svg>`,
+ serra:`<svg viewBox="0 0 300 400" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+  <defs><linearGradient id="ceuS" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#8FC5D6"/><stop offset="1" stop-color="#F6E0B8"/></linearGradient></defs>
+  <rect width="300" height="400" fill="url(#ceuS)"/>
+  <circle cx="228" cy="86" r="30" fill="#FFF3DA"/>
+  <path d="M0 400V262l70-84 62 78 44-52 124 122z" fill="#6E5E4E"/>
+  <path d="M0 400V300l58-58 70 72 50-42 122 92z" fill="#8A7660"/>
+  <path d="M70 178l26 32H44zM176 204l20 24h-40z" fill="#F5EDDD"/>
+  <path d="M0 400V348l64-30 76 30 76-26 84 32v46z" fill="#4C8577"/>
+  <path d="M148 330c-6 26-4 44 2 70" stroke="#DCEFF5" stroke-width="9" fill="none" opacity=".85" stroke-linecap="round"/>
+  <ellipse cx="150" cy="396" rx="34" ry="9" fill="#DCEFF5" opacity=".7"/>
+ </svg>`,
+ sertao:`<svg viewBox="0 0 300 400" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+  <defs><linearGradient id="ceuT" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#7FB6C9"/><stop offset=".6" stop-color="#DCC79B"/><stop offset="1" stop-color="#C99A63"/></linearGradient></defs>
+  <rect width="300" height="400" fill="url(#ceuT)"/>
+  <ellipse cx="76" cy="74" rx="40" ry="14" fill="#FFF" opacity=".45"/>
+  <ellipse cx="206" cy="52" rx="30" ry="11" fill="#FFF" opacity=".35"/>
+  <path d="M0 400V286l88-58 76 44 136-46v174z" fill="#6F8F62"/>
+  <path d="M0 400V330l96-34 96 26 108-24v102z" fill="#4E6E4A"/>
+  <g stroke="#2F5138" stroke-width="11" stroke-linecap="round" fill="none">
+   <path d="M212 396V300"/><path d="M212 340l-24-14v-24"/><path d="M212 322l26-16v-28"/></g>
+  <g stroke="#3B6244" stroke-width="8" stroke-linecap="round" fill="none">
+   <path d="M64 398v-58"/><path d="M64 366l-16-10v-16"/></g>
+  <path d="M118 396c0-22 14-38 32-38s32 16 32 38z" fill="#B5543C"/>
+  <rect x="140" y="374" width="18" height="22" fill="#7A3527"/>
+ </svg>`,
+ europa:`<svg viewBox="0 0 300 400" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+  <defs><linearGradient id="ceuE" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#4E9DC4"/><stop offset="1" stop-color="#FBE3C0"/></linearGradient></defs>
+  <rect width="300" height="400" fill="url(#ceuE)"/>
+  <circle cx="66" cy="66" r="24" fill="#FFF4DC" opacity=".9"/>
+  <path d="M0 400V236l50-40 44 34 56-44 60 46 90-58v226z" fill="#3E7C86"/>
+  <g>
+   <rect x="18" y="246" width="52" height="96" fill="#F2D9B8"/><path d="M14 246l30-24 30 24z" fill="#C4573F"/>
+   <rect x="76" y="268" width="46" height="74" fill="#E8C79E"/><path d="M72 268l27-21 27 21z" fill="#B04A36"/>
+   <rect x="130" y="238" width="54" height="104" fill="#F6E4CA"/><path d="M126 238l31-25 31 25z" fill="#C4573F"/>
+   <rect x="192" y="262" width="50" height="80" fill="#EBD2AE"/><path d="M188 262l29-23 29 23z" fill="#A8452F"/>
+   <rect x="250" y="248" width="46" height="94" fill="#F2D9B8"/><path d="M246 248l27-22 27 22z" fill="#B04A36"/></g>
+  <g fill="#2A5A6B" opacity=".65">
+   <rect x="30" y="270" width="11" height="16" rx="2"/><rect x="49" y="270" width="11" height="16" rx="2"/>
+   <rect x="30" y="302" width="11" height="16" rx="2"/><rect x="49" y="302" width="11" height="16" rx="2"/>
+   <rect x="88" y="288" width="10" height="15" rx="2"/><rect x="104" y="288" width="10" height="15" rx="2"/>
+   <rect x="142" y="262" width="11" height="16" rx="2"/><rect x="161" y="262" width="11" height="16" rx="2"/>
+   <rect x="142" y="296" width="11" height="16" rx="2"/><rect x="161" y="296" width="11" height="16" rx="2"/>
+   <rect x="204" y="284" width="11" height="16" rx="2"/><rect x="222" y="284" width="11" height="16" rx="2"/>
+   <rect x="262" y="274" width="10" height="15" rx="2"/><rect x="279" y="274" width="10" height="15" rx="2"/></g>
+  <path d="M0 342h300v58H0z" fill="#2B6B85"/>
+  <path d="M0 360q75 12 150 0t150 0v14q-75-12-150 0T0 374z" fill="#4E94AC" opacity=".7"/>
+ </svg>`,
+ ilha:`<svg viewBox="0 0 300 400" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+  <defs><linearGradient id="ceuI" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#63B5D6"/><stop offset="1" stop-color="#CFEBEA"/></linearGradient></defs>
+  <rect width="300" height="400" fill="url(#ceuI)"/>
+  <circle cx="238" cy="62" r="26" fill="#FFF6E2"/>
+  <path d="M96 214c8-64 22-96 34-96s26 32 34 96z" fill="#5E7A63"/>
+  <path d="M118 214c6-44 14-64 20-64s14 20 20 64z" fill="#7A9A78"/>
+  <path d="M0 214h300v186H0z" fill="#1E7E95"/>
+  <path d="M0 244q60 16 120 0t180 0v42q-90-16-180 0T0 286z" fill="#2FA0AE" opacity=".65"/>
+  <path d="M0 316q80 18 160 0t140 0v84H0z" fill="#57C2C0" opacity=".55"/>
+  <path d="M0 366q80 16 150 0t150 0v34H0z" fill="#F0E2C6"/>
+  <g stroke="#F5FBFB" stroke-width="4" fill="none" opacity=".75" stroke-linecap="round">
+   <path d="M40 268q14-8 28 0t28 0"/><path d="M196 300q14-8 28 0t28 0"/></g>
+  <path d="M60 366c0-38-4-66-6-82" stroke="#7A4B2A" stroke-width="6" fill="none" stroke-linecap="round"/>
+  <g fill="#2F6E4F">
+   <path d="M54 282c-20-14-36-12-46 0 16-5 30-3 46 5z"/><path d="M54 282c18-16 36-16 48-6-18-2-32 2-48 10z"/>
+   <path d="M54 282c-15 4-26 15-30 30 10-13 20-22 33-25z"/><path d="M54 282c16 5 26 16 28 31-8-15-16-23-30-26z"/></g>
+ </svg>`
+};
+
+const OPCOES=[
+ {destino:'Triunfo',pais:'Pernambuco',valor:2200,dias:4,cena:'serra',
+  pontos:['Pico do Papagaio','Cachoeira do Pinga','Museu do Cangaço','Teatro Cinema Guarany','Engenho de rapadura','Café da manhã na Serra']},
+ {destino:'Pipa',pais:'Rio Grande do Norte',valor:3000,dias:6,cena:'praia',
+  pontos:['Praia do Amor','Baía dos Golfinhos','Chapadão ao pôr do sol','Lagoa de Guaraíras','Santuário Ecológico','Noite na Av. Baía dos Golfinhos']},
+ {destino:'Salvador',pais:'Bahia',valor:3000,dias:5,cena:'cidade',
+  pontos:['Pelourinho','Elevador Lacerda','Igreja do Bonfim','Mercado Modelo','Praia do Porto da Barra','Jantar na Rua do Pelô']},
+ {destino:'Costa Amalfitana',pais:'Itália',valor:38000,dias:12,cena:'europa',
+  pontos:['Positano','Ravello e os jardins','Passeio de barco em Capri','Gruta Azul','Limoncello em Amalfi','Sentiero degli Dei']},
+ {destino:'Fernando de Noronha',pais:'Pernambuco',valor:14000,dias:6,cena:'ilha',
+  pontos:['Baía do Sancho','Baía dos Porcos','Mergulho com tartarugas','Praia do Leão','Pôr do sol no Forte','Mirante dos Golfinhos']},
+ {destino:'Chapada Diamantina',pais:'Bahia',valor:5200,dias:7,cena:'sertao',
+  pontos:['Cachoeira da Fumaça','Poço Encantado','Morro do Pai Inácio','Vale do Pati','Gruta da Lapa Doce','Rio Mucugezinho']},
+ {destino:'Buenos Aires',pais:'Argentina',valor:11000,dias:6,cena:'cidade',
+  pontos:['Caminito em La Boca','Recoleta','Show de tango','Puerto Madero','Parrilla de verdade','Feira de San Telmo']}
+];
+
+let viagens=[{
+  id:1,destino:'Jericoacoara',data:'2026-09',status:'confirmada',dias:7,valor:0,cena:'praia',autor:'Nós dois',
+  pontos:[
+    {t:'Pôr do sol na Duna do Pôr do Sol',ok:false},
+    {t:'Pedra Furada',ok:false},
+    {t:'Lagoa do Paraíso — rede dentro da água',ok:false},
+    {t:'Lagoa Azul',ok:false},
+    {t:'Passeio de buggy pelas dunas',ok:false},
+    {t:'Praia do Preá (kitesurf)',ok:false},
+    {t:'Árvore da Preguiça',ok:false},
+    {t:'Forró na Rua Principal',ok:false}
+  ]
+}];
+
+/* ---------- salvamento ---------- */
+const CHAVE='viagensDoCasal';
+let poupado=0;
+
+function temStorage(){
+  try{localStorage.setItem('_t','1');localStorage.removeItem('_t');return true}catch(e){return false}
+}
+function salvarLocal(avisar){
+  if(!temStorage()){
+    if(avisar) aviso('Este navegador bloqueia o salvamento automático. Use "Exportar" para guardar o arquivo.',true);
+    return false;
+  }
+  localStorage.setItem(CHAVE,JSON.stringify({viagens,poupado,em:Date.now()}));
+  if(avisar) aviso('Salvo neste navegador ✓');
+  marcarStatus();
+  return true;
+}
+function carregarLocal(){
+  if(!temStorage()) return false;
+  const bruto=localStorage.getItem(CHAVE);
+  if(!bruto) return false;
+  try{
+    const d=JSON.parse(bruto);
+    if(Array.isArray(d.viagens)&&d.viagens.length){viagens=d.viagens;poupado=+d.poupado||0;return true}
+  }catch(e){}
+  return false;
+}
+function marcarStatus(){
+  const el=document.getElementById('statusSalvo');
+  el.textContent=temStorage()
+    ? 'Salvo automaticamente neste navegador · última vez agora'
+    : 'Salvamento automático indisponível aqui — use Exportar para não perder';
+}
+
+function exportarJSON(){
+  const dados={app:'viagens-do-casal',versao:1,em:new Date().toISOString(),poupado,viagens};
+  baixar(new Blob([JSON.stringify(dados,null,2)],{type:'application/json'}),'nossas-viagens.json');
+  aviso('Cronograma exportado ✓');
+}
+function importarJSON(input){
+  const f=input.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const d=JSON.parse(r.result);
+      const lista=Array.isArray(d)?d:d.viagens;
+      if(!Array.isArray(lista)) throw 0;
+      if(viagens.length&&!confirm('Isso vai substituir a lista atual. Continuar?')) return;
+      viagens=lista.map(v=>({...v,id:v.id||Date.now()+Math.random(),pontos:v.pontos||[]}));
+      poupado=+d.poupado||0;
+      render();salvarLocal();
+      aviso('Cronograma importado ✓');
+    }catch(e){aviso('Arquivo não reconhecido. Use um .json exportado por este app.',true)}
+  };
+  r.readAsText(f);input.value='';
+}
+
+function baixar(blob,nome){
+  const u=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=u;a.download=nome;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000);
+}
+
+/* PNG: desenha um resumo em canvas — sem biblioteca externa */
+function exportarPNG(){
+  const L=[...viagens].sort((a,b)=>(a.data||'9999').localeCompare(b.data||'9999'));
+  const alt=180+L.length*118,c=document.createElement('canvas');
+  c.width=900;c.height=alt;const x=c.getContext('2d');
+  x.fillStyle='#FDF6EC';x.fillRect(0,0,900,alt);
+  x.fillStyle='#0B3C49';x.fillRect(0,0,900,150);
+  x.fillStyle='#E4D3B8';x.font='600 15px sans-serif';
+  x.fillText('C R O N O G R A M A   D O   C A S A L',48,58);
+  x.fillStyle='#FDF6EC';x.font='700 44px Georgia,serif';
+  x.fillText('Onde a gente vai parar',44,110);
+  let y=200;
+  L.forEach(v=>{
+    x.fillStyle='#fff';x.fillRect(44,y-34,812,98);
+    x.fillStyle=v.status==='confirmada'?'#4C8577':'#E8623C';x.fillRect(44,y-34,7,98);
+    x.fillStyle='#12262C';x.font='700 27px Georgia,serif';x.fillText(v.destino,72,y);
+    x.fillStyle='#4C8577';x.font='400 16px sans-serif';
+    x.fillText(quando(v.data)+(v.dias?' · '+v.dias+' dias':''),72,y+26);
+    x.fillStyle='#7a8a8f';x.font='400 15px sans-serif';
+    const feitos=v.pontos.filter(p=>p.ok).length;
+    x.fillText(feitos+'/'+v.pontos.length+' lugares marcados',72,y+50);
+    x.fillStyle='#12262C';x.font='700 21px Georgia,serif';x.textAlign='right';
+    x.fillText(v.valor>0?fmt(v.valor):'confirmada',830,y+6);x.textAlign='left';
+    y+=118;
+  });
+  x.fillStyle='#8d9a9e';x.font='400 14px sans-serif';
+  x.fillText('Total planejado: '+fmt(viagens.reduce((s,v)=>s+(+v.valor||0),0)),48,alt-24);
+  c.toBlob(b=>{baixar(b,'nossas-viagens.png');aviso('Imagem salva ✓')});
+}
+
+/* aviso flutuante */
+let tAviso;
+function aviso(txt,erro){
+  let t=document.getElementById('toast');
+  if(!t){t=document.createElement('div');t.id='toast';document.body.appendChild(t);
+    t.style.cssText='position:fixed;left:50%;bottom:28px;transform:translateX(-50%);z-index:99;padding:13px 24px;border-radius:100px;font-family:Outfit,sans-serif;font-size:14px;font-weight:500;color:#fff;box-shadow:0 8px 24px rgba(11,60,73,.3);transition:opacity .3s';}
+  t.textContent=txt;t.style.background=erro?'#C0452B':'#4C8577';t.style.opacity='1';
+  clearTimeout(tAviso);tAviso=setTimeout(()=>t.style.opacity='0',erro?4200:2200);
+}
+
+/* ---------- melhor época ---------- */
+const EPOCA={
+ 'Jericoacoara':'Jul–Dez: vento bom e pouca chuva',
+ 'Triunfo':'Mai–Ago: serra fresca, até 16°C',
+ 'Pipa':'Set–Mar: mar calmo e sol firme',
+ 'Salvador':'Set–Mar: menos chuva',
+ 'Fernando de Noronha':'Ago–Nov: água transparente',
+ 'Chapada Diamantina':'Abr–Out: cachoeiras cheias, trilhas secas',
+ 'Costa Amalfitana':'Mai–Jun e Set: sem multidão',
+ 'Buenos Aires':'Mar–Mai e Set–Nov: clima ameno'
+};
+
+/* ---------- cofrinho ---------- */
+function renderCofre(){
+  const meta=viagens.reduce((s,v)=>s+(+v.valor||0),0);
+  const pct=meta?Math.min(100,Math.round(poupado/meta*100)):0;
+  const prox=[...viagens].filter(v=>v.data&&+v.valor>0).sort((a,b)=>a.data.localeCompare(b.data))[0];
+  let dica='Guardem um valor fixo por mês e vejam a barra encher.';
+  if(prox&&meta>poupado){
+    const meses=Math.max(1,Math.round((new Date(prox.data+'-01T00:00:00')-new Date())/2.628e9));
+    dica=`Faltam ${fmt(meta-poupado)}. Guardando <b>${fmt(Math.ceil((meta-poupado)/meses))} por mês</b>, vocês chegam lá antes de ${quando(prox.data)}.`;
+  }else if(meta>poupado){
+    dica=`Faltam ${fmt(meta-poupado)}. Coloquem uma data nas viagens pra ver quanto guardar por mês.`;
+  }
+  if(meta&&poupado>=meta) dica='Meta batida! Dá pra fechar tudo que está na lista. 🎉';
+  document.getElementById('cofre').innerHTML=`
+    <div class="cofre-box">
+      <h3>Cofrinho da viagem</h3>
+      <p class="sub2">Quanto já foi guardado pro que está na lista</p>
+      <div class="trilho"><i style="width:${pct}%"></i></div>
+      <div class="cofre-nums"><span>guardado <b>${fmt(poupado)}</b></span><span>meta <b>${fmt(meta)}</b></span></div>
+      <div class="poupar">
+        <input type="number" id="fPoup" placeholder="Guardar R$" min="0">
+        <button onclick="guardar()">Adicionar</button>
+        <button onclick="poupado=0;render();salvarLocal()" class="mini" style="background:transparent;color:#E4D3B8;border:1px solid rgba(228,211,184,.4)">Zerar</button>
+      </div>
+      <p class="dica">${dica}</p>
+      ${placarAutores()}
+    </div>`;
+}
+function placarAutores(){
+  const c={};viagens.forEach(v=>{if(v.autor)c[v.autor]=(c[v.autor]||0)+1});
+  const t=Object.entries(c);if(!t.length)return'';
+  return `<div class="placar" style="margin-top:14px;border-top:1px solid rgba(228,211,184,.25);padding-top:14px;gap:16px">
+    ${t.map(([a,n])=>`<span style="color:#E4D3B8">${a}: <b style="color:#fff">${n}</b> roteiro${n>1?'s':''}</span>`).join('')}
+  </div>`;
+}
+function guardar(){
+  const v=+document.getElementById('fPoup').value;
+  if(!v)return;poupado+=v;render();salvarLocal();aviso('Guardado '+fmt(v)+' ✓');
+}
+
+const fmt=v=>'R$ '+v.toLocaleString('pt-BR');
+const quando=d=>{if(!d)return'Data a definir';const[a,m]=d.split('-');return MESES[+m-1]+' de '+a};
+function contagem(d){if(!d)return'';const dias=Math.ceil((new Date(d+'-01T00:00:00')-new Date())/864e5);
+  return dias<0?'já rolou 💛':dias===0?'é hoje!':'faltam '+dias+' dias'}
+
+function renderGaleria(){
+  galeria.innerHTML='';
+  OPCOES.forEach((o,i)=>{
+    const jaTem=viagens.some(v=>v.destino===o.destino);
+    const b=document.createElement('button');
+    b.className='card'+(jaTem?' jaTem':'');
+    b.onclick=()=>jaTem?null:adicionarOpcao(i);
+    b.innerHTML=`
+      <div class="cena">${CENAS[o.cena]||''}</div>
+      <div class="veu"></div>
+      <span class="mais">${jaTem?'✓':'+'}</span>
+      <div class="txt">
+        <p class="pais">${o.pais}</p>
+        <h3>${o.destino}</h3>
+        <p class="preco">${jaTem?'já está na lista':fmt(o.valor)+' <small>· '+o.dias+' dias, casal</small>'}</p>
+      </div>`;
+    galeria.appendChild(b);
+  });
+}
+
+function adicionarOpcao(i){
+  const o=OPCOES[i];
+  pendente=i;
+  document.getElementById('quemTitulo').textContent='Quem quer '+o.destino+'?';
+  document.querySelectorAll('#quem .au').forEach(x=>x.classList.remove('on'));
+  if(quem.showModal) quem.showModal(); else quem.setAttribute('open','');
+}
+let pendente=null;
+function confirmarQuem(autor){
+  const o=OPCOES[pendente];
+  viagens.push({id:Date.now(),destino:o.destino,data:'',status:'sonho',dias:o.dias,valor:o.valor,cena:o.cena,
+    autor,pontos:o.pontos.map(t=>({t,ok:false}))});
+  if(quem.close) quem.close(); else quem.removeAttribute('open'); pendente=null;
+  render();salvarLocal();
+  aviso(autor==='Nós dois'?'Adicionado por vocês dois ✓':autor+' adicionou '+o.destino+' ✓');
+  const ult=document.getElementById('lista').lastElementChild;
+  if(ult&&ult.scrollIntoView) ult.scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+function render(){
+  renderGaleria();
+  const l=document.getElementById('lista');
+  const ordem=[...viagens].sort((a,b)=>(a.data||'9999').localeCompare(b.data||'9999'));
+  l.innerHTML=ordem.length?'':'<div class="vazio"><p>Lista vazia</p>Escolha um destino acima pra começar.</div>';
+  ordem.forEach(v=>{
+    const el=document.createElement('article');
+    el.className='viagem '+v.status;
+    el.innerHTML=`
+      ${v.cena?`<div class="capa">${CENAS[v.cena]||''}</div>`:''}
+      <span class="tag ${v.status==='confirmada'?'ok':'talvez'}">${v.status==='confirmada'?'confirmada':'na lista'}</span>
+      <h3 class="destino">${v.destino}${EPOCA[v.destino]?`<span class="selo">☀ ${EPOCA[v.destino]}</span>`:''}</h3>
+      <p class="quando">${quando(v.data)}${v.dias?' · '+v.dias+' dias':''}</p>
+      <p class="contagem">${contagem(v.data)}</p>
+      ${v.valor>0?`<div class="grana">
+        <div><span>valor do casal</span><b>${fmt(v.valor)}</b></div>
+        <div><span>por pessoa</span><b>${fmt(Math.round(v.valor/2))}</b></div>
+        ${v.dias?`<div><span>por dia</span><b>${fmt(Math.round(v.valor/v.dias))}</b></div>`:''}
+      </div>`:'<div class="grana"><div><span>orçamento</span><b>tudo certo ✓</b></div></div>'}
+      ${v.autor?`<div class="credito a-${v.autor==='Nós dois'?'nos':v.autor}">
+        <span class="bolha">${v.autor==='Nós dois'?'♥':v.autor[0]}</span>
+        <span>${v.autor==='Nós dois'?'Vocês dois montaram esse roteiro!':v.autor+' criou esse roteiro!'}</span>
+        <span class="fogos">🎉</span>
+      </div>`:''}
+      ${v.pontos.length?`<div class="progresso">
+        <div class="trilho2"><i style="width:${Math.round(v.pontos.filter(p=>p.ok).length/v.pontos.length*100)}%"></i></div>
+        <span>${v.pontos.filter(p=>p.ok).length} de ${v.pontos.length} lugares</span>
+      </div>`:''}
+      <ul class="pontos">${v.pontos.map((p,i)=>`
+        <li class="${p.ok?'feito':''}">
+          <input type="checkbox" ${p.ok?'checked':''} onchange="marcar(${v.id},${i})">
+          <label>${p.t}</label>
+          <button class="rm" onclick="tirar(${v.id},${i})" title="Remover">×</button>
+        </li>`).join('')}</ul>
+      <div class="addponto">
+        <input placeholder="Adicionar um lugar pra conhecer" onkeydown="if(event.key==='Enter')novoPonto(${v.id},this)">
+        <button onclick="novoPonto(${v.id},this.previousElementSibling)">Adicionar</button>
+      </div>
+      <div class="acoes">
+        <button onclick="abrir(${v.id})">Editar viagem</button>
+        <button onclick="excluir(${v.id})">Excluir</button>
+      </div>`;
+    l.appendChild(el);
+  });
+  sConf.textContent=viagens.filter(v=>v.status==='confirmada').length;
+  sSonho.textContent=viagens.filter(v=>v.status==='sonho').length;
+  sGrana.textContent=fmt(viagens.reduce((s,v)=>s+(+v.valor||0),0));
+  renderCofre();
+  marcarStatus();
+}
+
+let editando=null;
+function marcar(id,i){const v=viagens.find(x=>x.id===id);v.pontos[i].ok=!v.pontos[i].ok;render();salvarLocal()}
+function tirar(id,i){viagens.find(x=>x.id===id).pontos.splice(i,1);render();salvarLocal()}
+function novoPonto(id,input){const t=input.value.trim();if(!t)return;
+  viagens.find(x=>x.id===id).pontos.push({t,ok:false});input.value='';render();salvarLocal()}
+function excluir(id){if(!confirm('Remover essa viagem da lista?'))return;
+  viagens=viagens.filter(v=>v.id!==id);render();salvarLocal()}
+let autorSel='Nós dois';
+function escolherAutor(b){
+  document.querySelectorAll('.au').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');autorSel=b.dataset.autor;
+}
+function abrir(id){
+  editando=id??null;
+  const v=id?viagens.find(x=>x.id===id):null;
+  modalTitulo.textContent=v?'Editar viagem':'Nova viagem';
+  fDest.value=v?v.destino:'';fData.value=v?v.data:'';fStatus.value=v?v.status:'sonho';
+  fDias.value=v?v.dias||'':'';fValor.value=v?v.valor||'':'';fCena.value=v?v.cena||'praia':'praia';
+  autorSel=v?.autor||'Nós dois';
+  document.querySelectorAll('.au').forEach(x=>x.classList.toggle('on',x.dataset.autor===autorSel));
+  if(modal.showModal) modal.showModal(); else modal.setAttribute('open',''); fDest.focus();
+}
+function salvar(){
+  const d=fDest.value.trim();if(!d){fDest.focus();return}
+  const dados={destino:d,data:fData.value,status:fStatus.value,dias:+fDias.value||0,
+               valor:+fValor.value||0,cena:fCena.value,autor:autorSel};
+  if(editando)Object.assign(viagens.find(v=>v.id===editando),dados);
+  else viagens.push({id:Date.now(),...dados,pontos:[]});
+  if(modal.close) modal.close(); else modal.removeAttribute('open'); render();salvarLocal();
+}
+
+carregarLocal();
+render();
+window.addEventListener('beforeunload',()=>salvarLocal());
+</script>
+</body>
+</html>
